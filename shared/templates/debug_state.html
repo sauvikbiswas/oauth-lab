@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Debug state{% endblock %}
+
+{% block content %}
+  <h1>Debug state</h1>
+  <p class="muted">Dev-only snapshot of session and in-memory storage.</p>
+  <pre class="json-dump">{{ payload | highlight_json }}</pre>
+  <p class="muted">Raw JSON: <code>curl -H 'Accept: application/json' {{ request.url_root.rstrip('/') }}/debug/state</code></p>
+{% endblock %}
