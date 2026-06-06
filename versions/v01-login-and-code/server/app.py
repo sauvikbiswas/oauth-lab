@@ -5,7 +5,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import os
-from urllib.parse import urlencode
 
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, session, url_for
@@ -19,14 +18,6 @@ from routes.debug import debug_bp
 from routes.login import login_bp
 
 load_dotenv()
-
-
-def _authorize_url() -> str:
-    auth_server = os.environ.get("AUTH_SERVER_URL", "http://localhost:5000").rstrip("/")
-    return (
-        f"{auth_server}/authorize?"
-        f"{urlencode({'response_type': 'code', 'client_id': os.environ.get('CLIENT_ID', 'demo-client'), 'redirect_uri': os.environ.get('REDIRECT_URI', 'http://localhost:5001/callback')})}"
-    )
 
 
 def create_app() -> Flask:
@@ -51,7 +42,7 @@ def create_app() -> Flask:
 
     @app.route("/")
     def index():
-        return render_template("index.html", authorize_url=_authorize_url())
+        return render_template("index.html")
 
     @app.route("/welcome")
     def welcome():
@@ -60,7 +51,6 @@ def create_app() -> Flask:
         return render_template(
             "welcome.html",
             username=session.get("username"),
-            authorize_url=_authorize_url(),
         )
 
     return app

@@ -5,7 +5,7 @@
 {% block content %}
   <h1>OAuth Authorization Server (v01)</h1>
   <ul class="links">
-    <li><a href="{{ authorize_url }}">/authorize</a> (example with required params)</li>
+    <li><code>GET /authorize</code> — called by the client with <code>client_id</code> and <code>redirect_uri</code></li>
     <li><a href="/login">/login</a></li>
     <li><a href="/debug/state">/debug/state</a></li>
   </ul>

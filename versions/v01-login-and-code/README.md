@@ -52,11 +52,7 @@ python3 app.py
 
 ## Try it
 
-1. Open [http://localhost:5001](http://localhost:5001) and click **Start authorization**, or open:
-
-```
-http://localhost:5000/authorize?response_type=code&client_id=demo-client&redirect_uri=http://localhost:5001/callback
-```
+1. Open [http://localhost:5001](http://localhost:5001) and click **Start authorization**.
 
 2. Log in as `user0` / `password0`.
 

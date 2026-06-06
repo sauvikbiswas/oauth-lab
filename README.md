@@ -1,6 +1,6 @@
 # OAuth 2 Learning Lab
 
-Learn OAuth 2 **Authorization Code + PKCE** by building it in versioned snapshots. Start with the simplest flow and add security one step at a time.
+Learn OAuth 2 by building it in versioned snapshots. Start with the simplest flow and add security one step at a time.
 
 ## Start here
 
@@ -38,11 +38,7 @@ cp ../../../.env.example .env
 python3 app.py
 ```
 
-Open [http://localhost:5001](http://localhost:5001) and follow the link, or use:
-
-```
-http://localhost:5000/authorize?response_type=code&client_id=demo-client&redirect_uri=http://localhost:5001/callback
-```
+Open [http://localhost:5001](http://localhost:5001) and click **Start authorization**.
 
 Log in as `user0` / `password0`. Expected callback:
 
