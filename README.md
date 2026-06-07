@@ -15,6 +15,7 @@ See also: [docs/tutorial-overview.md](docs/tutorial-overview.md)
 | Version | Status | Adds |
 |---------|--------|------|
 | [v01](versions/v01-login-and-code/) | **available** | login + code redirect; param resume; client registry + redirect_uri validation |
+| [v02](versions/v02-state-csrf/) | **available** | OAuth `state` (CSRF); client generates + verifies, server requires + pass-through |
 
 ## Personal sandbox
 

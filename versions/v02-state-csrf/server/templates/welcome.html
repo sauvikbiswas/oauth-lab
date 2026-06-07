@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+  <h1>Welcome</h1>
+  <p>Logged in as {{ username }}.</p>
+  <p class="muted">You did not arrive from an authorization request. To start the OAuth flow, open the client app at <code>http://localhost:5001</code>.</p>
+  <p class="muted">In production, users never pick a callback URL — it is registered for each client (see <code>clients</code> in <a href="/debug/state">/debug/state</a>).</p>
+{% endblock %}
