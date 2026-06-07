@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
-
+import base64
+import hashlib
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import os
@@ -8,6 +9,7 @@ import secrets
 from datetime import datetime
 from urllib.parse import urlencode
 
+import requests
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session
 from jinja2 import ChoiceLoader, FileSystemLoader
@@ -35,7 +37,7 @@ def create_app() -> Flask:
 
     @app.context_processor
     def inject_lab_context():
-        return {"lab_version": "v02", "lab_role": "client"}
+        return {"lab_version": "v03", "lab_role": "client"}
 
     app.register_blueprint(debug_bp)
 
@@ -47,7 +49,12 @@ def create_app() -> Flask:
     def login():
         state = secrets.token_urlsafe(32)
         session["oauth_state"] = state
-        memory.pending_oauth_states[state] = {"created_at": datetime.now()}
+        
+        code_verifier = secrets.token_urlsafe(32)
+        memory.pending_oauth_states[state] = {"created_at": datetime.now(), "code_verifier": code_verifier}
+        session["code_verifier"] = code_verifier
+        
+        code_challenge = base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode()).digest()).decode().rstrip("=")
 
         auth_server = os.environ.get("AUTH_SERVER_URL", "http://localhost:25000").rstrip("/")
         params = {
@@ -55,6 +62,8 @@ def create_app() -> Flask:
             "client_id": os.environ.get("CLIENT_ID", "demo-client"),
             "redirect_uri": os.environ.get("REDIRECT_URI", "http://localhost:25001/callback"),
             "state": state,
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256",
         }
         return redirect(f"{auth_server}/authorize?{urlencode(params)}")
 
@@ -63,6 +72,7 @@ def create_app() -> Flask:
         state = request.args.get("state")
         code = request.args.get("code")
         expected = session.pop("oauth_state", None)
+        code_verifier = session.pop("code_verifier", None)
 
         if not state:
             return render_template("callback.html", error="State is missing"), 400
@@ -70,12 +80,51 @@ def create_app() -> Flask:
             return render_template("callback.html", error="State mismatch"), 400
         if not code:
             return render_template("callback.html", error="Authorization code is missing"), 400
+        if not code_verifier:
+            return render_template("callback.html", error="Code verifier is missing from session"), 400
 
+        auth_server = os.environ.get("AUTH_SERVER_URL", "http://localhost:25000").rstrip("/")
+        resp = requests.post(
+            f"{auth_server}/token",
+            data={
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": os.environ.get("REDIRECT_URI", "http://localhost:25001/callback"),
+                "client_id": os.environ.get("CLIENT_ID", "demo-client"),
+                "client_secret": os.environ.get("CLIENT_SECRET", "demo-secret"),
+                "code_verifier": code_verifier,
+            },
+            timeout=10,
+        )
+
+        try:
+            payload = resp.json()
+        except requests.JSONDecodeError:
+            hint = ""
+            if resp.status_code == 403 and "localhost" in auth_server:
+                hint = (
+                    " Check AUTH_SERVER_URL in client/.env "
+                    "(use http://localhost:25000 for the auth server)."
+                )
+            return render_template(
+                "callback.html",
+                error=f"Token endpoint returned non-JSON (status {resp.status_code}).{hint}",
+            ), 502
+
+        if resp.status_code != 200 or "error" in payload:
+            desc = payload.get("error_description", payload.get("error", "Token exchange failed"))
+            return render_template("callback.html", error=desc), resp.status_code
+
+        access_token = payload["access_token"]
+        memory.access_tokens[access_token] = {
+            "state": state,
+            "received_at": datetime.now(),
+        }
         memory.authorization_codes[code] = {
             "state": state,
             "received_at": datetime.now(),
         }
-        return render_template("callback.html", code=code, state=state)
+        return render_template("callback.html", code=code, state=state, access_token=access_token)
 
     return app
 

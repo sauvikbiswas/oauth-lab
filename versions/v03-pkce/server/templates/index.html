@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Authorization Server{% endblock %}
+
+{% block content %}
+  <h1>OAuth Authorization Server</h1>
+  <ul class="links">
+    <li><code>GET /authorize</code> — called by the client with <code>client_id</code> and <code>redirect_uri</code></li>
+    <li><a href="/login">/login</a></li>
+    <li><a href="/debug/state">/debug/state</a></li>
+  </ul>
+{% endblock %}

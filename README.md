@@ -39,12 +39,12 @@ cp ../../../.env.example .env
 python3 app.py
 ```
 
-Open [http://localhost:5001](http://localhost:5001) and click **Start authorization**.
+Open [http://localhost:25001](http://localhost:25001) and click **Start authorization**.
 
 Log in as `user0` / `password0`. Expected callback:
 
 ```
-http://localhost:5001/callback?code=<random-string>
+http://localhost:25001/callback?code=<random-string>
 ```
 
 ## Learning resources

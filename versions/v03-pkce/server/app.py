@@ -16,6 +16,7 @@ from shared.jinja_filters import register_lab_filters
 from routes.authorize import authorize_bp
 from routes.debug import debug_bp
 from routes.login import login_bp
+from routes.token import token_bp
 
 load_dotenv()
 
@@ -34,11 +35,12 @@ def create_app() -> Flask:
 
     @app.context_processor
     def inject_lab_context():
-        return {"lab_version": "v01", "lab_role": "server"}
+        return {"lab_version": "v03", "lab_role": "server"}
 
     app.register_blueprint(authorize_bp)
     app.register_blueprint(login_bp)
     app.register_blueprint(debug_bp)
+    app.register_blueprint(token_bp)
 
     @app.route("/")
     def index():

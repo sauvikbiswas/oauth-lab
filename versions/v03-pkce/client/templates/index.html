@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}OAuth Client{% endblock %}
+
+{% block content %}
+  <h1>OAuth Client</h1>
+  <p>
+    <a href="/login">Start authorization</a>
+  </p>
+  <p class="muted">v03: client generates state + PKCE verifier/challenge before redirect; callback exchanges code for access_token.</p>
+  <p><a href="/debug/state">/debug/state</a></p>
+
+  <h2>Authorize negative tests</h2>
+  <p>
+    <a href="http://localhost:25000/authorize?response_type=code&amp;client_id=demo-client&amp;redirect_uri=http://localhost:25001/callback">
+      Start authorization without state</a> (server should return 400)
+  </p>
+  <p>
+    <a href="http://localhost:25000/authorize?response_type=code&amp;client_id=demo-client&amp;redirect_uri=http://localhost:25001/callback&amp;state=negative-test-no-pkce">
+      Start authorization without PKCE</a> (missing code_challenge — server should return 400)
+  </p>
+  <p>
+    <a href="http://localhost:25000/authorize?response_type=code&amp;client_id=demo-client&amp;redirect_uri=http://localhost:25001/callback&amp;state=negative-test-plain&amp;code_challenge=dummy&amp;code_challenge_method=plain">
+      Start authorization with plain challenge method</a> (server should return 400)
+  </p>
+
+  <h2>PKCE interception demo</h2>
+  <p class="muted">After a successful login, copy <code>code</code> from the callback URL or server <a href="http://localhost:25000/debug/state">/debug/state</a>, then run in a terminal:</p>
+  <pre><code>curl -s -X POST http://localhost:25000/token \
+  -d grant_type=authorization_code \
+  -d code=PASTE_STOLEN_CODE_HERE \
+  -d redirect_uri=http://localhost:25001/callback \
+  -d client_id=demo-client \
+  -d client_secret=demo-secret \
+  -d code_verifier=totally-wrong-verifier</code></pre>
+  <p class="muted">Expected: <code>{"error": "invalid_grant", "error_description": "PKCE verification failed"}</code></p>
+  <p class="muted">Run the same curl again with the same code — expected: authorization code already used (replay blocked).</p>
+  <p class="muted">Stretch: omit <code>code_verifier</code> from the curl body — expected: <code>invalid_request</code>.</p>
+{% endblock %}

@@ -26,7 +26,7 @@ cp ../../../.env.example .env
 python3 app.py
 ```
 
-Server: [http://localhost:5000](http://localhost:5000) · Client: [http://localhost:5001](http://localhost:5001)
+Server: [http://localhost:25000](http://localhost:25000) · Client: [http://localhost:25001](http://localhost:25001)
 
 ## Guided path
 

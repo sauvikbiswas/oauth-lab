@@ -20,6 +20,6 @@ users: dict = {
 clients: dict = {
     "lab-client": {
         "client_secret": "lab-secret",
-        "redirect_uris": ["http://localhost:5001/callback"],
+        "redirect_uris": ["http://localhost:25001/callback"],
     },
 }
