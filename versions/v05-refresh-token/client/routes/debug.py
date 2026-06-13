@@ -16,15 +16,14 @@ def _serialize(obj):
 
 @debug_bp.route("/debug/state", methods=["GET"])
 def dump_state():
-    """Dev-only: dump Flask session, request args, and in-memory OAuth storage."""
+    """Dev-only: dump Flask session, request args, and in-memory client storage."""
     payload = {
         "request_args": request.args.to_dict(),
         "session": dict(session),
         "storage": {
+            "pending_oauth_states": memory.pending_oauth_states,
             "authorization_codes": memory.authorization_codes,
             "access_tokens": memory.access_tokens,
-            "users": memory.users,
-            "clients": memory.clients,
         },
     }
     payload = json.loads(json.dumps(payload, default=_serialize))

@@ -10,16 +10,19 @@ authorization_codes: dict = {}
 # access_token -> {user_id, client_id, expires_at}
 access_tokens: dict = {}
 
+# refresh_token -> {user_id, client_id, expires_at}
+refresh_tokens: dict = {}
+
 # username -> {password, user_id}  (learning only — do not store plaintext passwords in production)
 users: dict = {
-    "user0": {"password": "password0", "user_id": "user0"},
-    "user1": {"password": "password1", "user_id": "user1"},
+    "user0": {"password": "password0", "user_id": "user0", "username": "User Number 0", "email": "user0@oauth-lab.me"},
+    "user1": {"password": "password1", "user_id": "user1", "username": "User Number 1", "email": "user1@oauth-lab.me"},
 }
 
 # client_id -> {client_secret, redirect_uris}
 clients: dict = {
-    "lab-client": {
-        "client_secret": "lab-secret",
+    "demo-client": {
+        "client_secret": "demo-secret",
         "redirect_uris": ["http://localhost:25001/callback"],
     },
 }

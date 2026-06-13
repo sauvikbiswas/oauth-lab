@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 import os
 
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, redirect, render_template, session, url_for
 from jinja2 import ChoiceLoader, FileSystemLoader
 
 from shared.paths import SHARED_STATIC, SHARED_TEMPLATES
@@ -18,7 +18,6 @@ from routes.debug import debug_bp
 from routes.login import login_bp
 from routes.resource import resource_bp
 from routes.token import token_bp
-from routes.error import error_bp
 
 load_dotenv()
 
@@ -33,34 +32,30 @@ def create_app() -> Flask:
         ]
     )
     app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
+    app.config["SESSION_COOKIE_NAME"] = "oauth_server_session"
     register_lab_filters(app)
 
     @app.context_processor
     def inject_lab_context():
-        return {"lab_version": "sandbox", "lab_role": "server"}
+        return {"lab_version": "v05", "lab_role": "server"}
 
     app.register_blueprint(authorize_bp)
-    app.register_blueprint(token_bp)
     app.register_blueprint(login_bp)
-    app.register_blueprint(resource_bp)
     app.register_blueprint(debug_bp)
-    app.register_blueprint(error_bp)
+    app.register_blueprint(resource_bp)
+    app.register_blueprint(token_bp)
 
     @app.route("/")
     def index():
-        return (
-            "<!DOCTYPE html><html><head><title>[sandbox] Authorization Server</title>"
-            "<link rel='stylesheet' href='/static/lab.css'></head><body class='lab-server'>"
-            "<h1>OAuth Authorization Server</h1>"
-            "<p>Endpoints: "
-            "<a href='/authorize'>/authorize</a>, "
-            "<a href='/token'>/token</a> (POST), "
-            "<a href='/login'>/login</a>, "
-            "<a href='/api/me'>/api/me</a>, "
-            "<a href='/debug/state'>/debug/state</a>"
-            "</p>"
-            "<p><em>Protocol logic not implemented — see README checklist.</em></p>"
-            "</body></html>"
+        return render_template("index.html")
+
+    @app.route("/welcome")
+    def welcome():
+        if not session.get("logged_in"):
+            return redirect(url_for("login.login"))
+        return render_template(
+            "welcome.html",
+            username=session.get("username"),
         )
 
     return app
