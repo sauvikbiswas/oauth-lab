@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Authorization Server{% endblock %}
+
+{% block content %}
+  <h1>OAuth Authorization Server</h1>
+  <p class="muted">v06: authorization only — protected API lives on the resource server at <code>:25002</code>.</p>
+  <ul class="links">
+    <li><code>GET /authorize</code> — called by the client with <code>client_id</code> and <code>redirect_uri</code></li>
+    <li><code>POST /token</code> — exchange authorization code or refresh token (<code>clients</code> registry)</li>
+    <li><code>POST /introspect</code> — RFC 7662; resource server authenticates via <code>service_clients</code></li>
+    <li><a href="/login">/login</a></li>
+    <li><a href="/debug/state">/debug/state</a> — shows <code>clients</code> and <code>service_clients</code> separately</li>
+  </ul>
+{% endblock %}
