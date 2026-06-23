@@ -1,7 +1,8 @@
-"""OIDC routes — v07 stubs. Implement per docs/learning-oauth-2-07.
+"""OIDC routes — v08: add JWKS; RS256 in discovery.
 
-Step 4: GET /.well-known/openid-configuration
-Step 5: GET /userinfo
+Step 2: GET /jwks (JWK Set)
+Step 3: discovery jwks_uri + id_token_signing_alg_values_supported RS256
+Step 5: GET /userinfo (unchanged from v07)
 """
 
 import os
@@ -10,6 +11,7 @@ from flask import Blueprint, jsonify, request
 
 from routes.introspect import _active_from_jwt, _active_from_memory
 from storage import memory
+from keys import get_jwks
 
 oidc_bp = Blueprint("oidc", __name__)
 
@@ -26,13 +28,19 @@ def openid_configuration():
         "authorization_endpoint": f"{issuer}/authorize",
         "token_endpoint": f"{issuer}/token",
         "userinfo_endpoint": f"{issuer}/userinfo",
+        "jwks_uri": f"{issuer}/jwks",
         "response_types_supported": ["code"],
         "grant_types_supported": ["authorization_code", "refresh_token"],
         "subject_types_supported": ["public"],
-        "id_token_signing_alg_values_supported": ["HS256"],
+        "id_token_signing_alg_values_supported": ["RS256"],
         "scopes_supported": ["openid", "email", "profile"],
         "code_challenge_methods_supported": ["S256"],
     })
+
+
+@oidc_bp.route("/jwks", methods=["GET"])
+def jwks():
+    return jsonify(get_jwks())
 
 
 def _bearer_access_token() -> str | None:

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Resource Server{% endblock %}
+
+{% block content %}
+  <h1>OAuth Resource Server</h1>
+  <p class="muted">v08: profile data here; Mode B verifies RS256 JWTs via auth server <code>GET /jwks</code>.</p>
+  <p>Current mode: <code>TOKEN_VALIDATION={{ token_validation }}</code></p>
+  <ul class="links">
+    <li><code>GET /api/me</code> — Bearer token → validate → <code>sub</code> → local profile lookup</li>
+    <li><a href="/debug/state">/debug/state</a> — shows <code>profiles</code> dict (not auth tokens)</li>
+  </ul>
+{% endblock %}

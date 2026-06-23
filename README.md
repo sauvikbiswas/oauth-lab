@@ -3,7 +3,7 @@
 Learn OAuth 2 by building it in versioned snapshots. Start with the simplest flow and add one security or protocol idea per version.
 
 **v01–v05:** auth + resource on `:25000` · client on `:25001`  
-**v06–v07:** auth (OpenID Provider) on `:25000` · client on `:25001` · resource server on `:25002`  
+**v06+:** auth (OpenID Provider from v07) on `:25000` · client on `:25001` · resource server on `:25002`
 
 See [`.env.example`](.env.example) for defaults.
 
@@ -13,10 +13,8 @@ See [`.env.example`](.env.example) for defaults.
 
 Minimal runnable server + client: login, issue a `code`, redirect to callback. No `state`, no PKCE, no token endpoint.
 
-**Latest snapshot: [v07 — OpenID Connect](docs/learning-oauth-2-07/index.md)** · [code](versions/v07-openid-connect/)  
-Same three-process layout as v06, plus OIDC: `id_token`, `nonce`, UserInfo, and discovery. Builds on v06 split validation (introspection or JWT access tokens).
-
-Previous: [v06 — Split auth and resource servers](docs/learning-oauth-2-06/index.md) · [code](versions/v06-split-servers/)
+**Latest snapshot: [v08 — JWKS + RS256](https://sauvikbiswas.com/posts/learning-oauth-2-08/)** · [code](versions/v08-jwks-rs256/)  
+Same three-process layout as v07, plus asymmetric signing: `GET /jwks`, RS256 `id_token` and JWT access tokens; verifiers fetch public keys — no shared `JWT_SECRET`.
 
 ## Version roadmap
 
@@ -29,18 +27,26 @@ Previous: [v06 — Split auth and resource servers](docs/learning-oauth-2-06/ind
 | [v05](https://sauvikbiswas.com/posts/learning-oauth-2-05/) · [code](versions/v05-refresh-token/) | **available** | refresh tokens; silent client refresh |
 | [v06](https://sauvikbiswas.com/posts/learning-oauth-2-06/) · [code](versions/v06-split-servers/) | **available** | split auth server / resource server; `POST /introspect`; JWT or introspection validation; profile data on resource server |
 | [v07](https://sauvikbiswas.com/posts/learning-oauth-2-07/) · [code](versions/v07-openid-connect/) | **available** | OpenID Connect on v06 split; `id_token`, `nonce`, UserInfo, discovery; `/profile` triptych (identity + API data) |
+| [v08](https://sauvikbiswas.com/posts/learning-oauth-2-08/) · [code](versions/v08-jwks-rs256/) | **available** | JWKS + RS256; drop shared `JWT_SECRET`; publish `jwks_uri`; client and resource server verify `id_token` (and JWT access tokens) with public keys |
+| v09 | **planned** | [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707) resource indicators; `resource` parameter binds tokens to a specific API at mint time |
+| v10 | **planned** | [RFC 8693](https://datatracker.ietf.org/doc/html/rfc8693) token exchange (On-Behalf-Of); middle service swaps tokens for tighter downstream scope |
+| v11 | **planned** | MCP-style agent authorization; OAuth for AI tools calling protected APIs (dynamic client registration, delegation) |
+
+**Intermission 1:** [What industry ships and who gets paid](https://sauvikbiswas.com/posts/learning-oauth-2-intermission-01/) — after v07; market research before the v08+ delegation arc.
+
+v09–v11 are the current plan; version splits and ordering may change as snapshots land. Out of scope for the core lab path: enterprise SAML/SCIM, MFA/fraud, IGA/PAM, fine-grained AuthZ (ReBAC).
 
 Diff adjacent versions to see exactly what changed:
 
 ```bash
-diff -ru versions/v06-split-servers versions/v07-openid-connect
+diff -ru versions/v07-openid-connect versions/v08-jwks-rs256
 ```
 
 ## Quick start
 
 **v01–v05:** two terminals (authorization + resource server on `:25000`, client on `:25001`).
 
-**v06–v07:** three terminals (auth `:25000`, resource `:25002`, client `:25001`). Copy [`.env.example`](.env.example) into each app directory (auth-server, resource-server, client).
+**v06+:** three terminals (auth `:25000`, resource `:25002`, client `:25001`). Copy [`.env.example`](.env.example) into each app directory (auth-server, resource-server, client).
 
 **v01 (simplest flow)**
 
@@ -60,50 +66,25 @@ cp ../../../.env.example .env
 python3 app.py
 ```
 
-**v07 (OpenID Connect — recommended starting point for split layout)**
+**v06+** (three-process split — use folder names from the [version roadmap](#version-roadmap); latest: `v08-jwks-rs256`)
 
 ```bash
 # Terminal 1 — auth server / OpenID Provider
-cd versions/v07-openid-connect/auth-server
+cd versions/v08-jwks-rs256/auth-server
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp ../../../.env.example .env
 python3 app.py
 
 # Terminal 2 — resource server
-cd versions/v07-openid-connect/resource-server
+cd versions/v08-jwks-rs256/resource-server
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp ../../../.env.example .env
 python3 app.py
 
 # Terminal 3 — client
-cd versions/v07-openid-connect/client
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp ../../../.env.example .env
-python3 app.py
-```
-
-**v06 (split servers, OAuth only)**
-
-```bash
-# Terminal 1 — auth server
-cd versions/v06-split-servers/auth-server
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp ../../../.env.example .env
-python3 app.py
-
-# Terminal 2 — resource server
-cd versions/v06-split-servers/resource-server
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp ../../../.env.example .env
-python3 app.py
-
-# Terminal 3 — client
-cd versions/v06-split-servers/client
+cd versions/v08-jwks-rs256/client
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp ../../../.env.example .env
@@ -116,7 +97,9 @@ For any other version, replace the folder names from the [version roadmap](#vers
 
 ## Learning resources
 
-**[Intermission — What industry ships and who gets paid](docs/learning-oauth-2-intermission-01/)** — market research pause after v07: vendors, pricing, M&A, and agent identity.
+**Intermissions**
+
+- [Intermission 1 — What industry ships and who gets paid](https://sauvikbiswas.com/posts/learning-oauth-2-intermission-01/) — after v07: vendors, pricing, M&A, and agent identity.
 
 - [RFC 6749 — OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749)
 - [RFC 7636 — PKCE](https://datatracker.ietf.org/doc/html/rfc7636)
@@ -126,4 +109,8 @@ For any other version, replace the folder names from the [version roadmap](#vers
 - [RFC 7519 — JSON Web Token](https://datatracker.ietf.org/doc/html/rfc7519) (v06 Mode B; v07 `id_token`)
 - [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) (v07)
 - [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) (v07)
+- [RFC 7517 — JSON Web Key (JWK)](https://datatracker.ietf.org/doc/html/rfc7517) (v08)
+- [RFC 8707 — Resource Indicators](https://datatracker.ietf.org/doc/html/rfc8707) (planned v09)
+- [RFC 8693 — Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693) (planned v10)
+- [MCP Authorization](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization) (planned v11)
 - [OAuth 2.0 Simplified](https://www.oauth.com/)

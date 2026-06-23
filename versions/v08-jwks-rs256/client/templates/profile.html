@@ -10,6 +10,7 @@
 
   <section id="id-token-claims">
     <h2>id_token claims (OIDC)</h2>
+    <p class="muted">Verified locally with RS256 + JWKS from the auth server.</p>
     {% if id_token_claims %}
       <pre>{{ id_token_claims | tojson(indent=2) }}</pre>
     {% else %}

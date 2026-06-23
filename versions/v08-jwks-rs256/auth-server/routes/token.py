@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import jwt
 import os
 
+from keys import get_private_key
 from flask import Blueprint, jsonify, request
 
 from storage import memory
@@ -23,20 +24,9 @@ def _oidc_issuer() -> str:
     return os.environ.get("OIDC_ISSUER", os.environ.get("AUTH_SERVER_URL", "http://localhost:25000")).rstrip("/")
 
 
-def _jwt_secret():
-    secret = os.environ.get("JWT_SECRET")
-    if not secret:
-        return None, (
-            jsonify({
-                "error": "server_error",
-                "error_description": "JWT_SECRET is not set (copy .env.example to auth-server/.env)",
-            }),
-            500,
-        )
-    return secret, None
+def _mint_id_token(user_id: str, client_id: str, nonce: str, scope: list[str]) -> str:
+    private_key = get_private_key()
 
-
-def _mint_id_token(user_id: str, client_id: str, nonce: str, scope: list[str], secret: str) -> str:
     expires_at = datetime.now() + timedelta(seconds=ACCESS_TOKEN_TTL)
     id_token_claims = {
         "iss": _oidc_issuer(),
@@ -52,7 +42,7 @@ def _mint_id_token(user_id: str, client_id: str, nonce: str, scope: list[str], s
     if "profile" in scope:
         id_token_claims["name"] = memory.users[user_id]["name"]
 
-    return jwt.encode(id_token_claims, secret, algorithm="HS256")
+    return jwt.encode(id_token_claims, private_key, algorithm="RS256", headers={"kid": "oauth-lab-v081"})
 
 
 def _token_response(access_token: str, refresh_token: str, expires_in: int, id_token: str | None = None):
@@ -73,6 +63,7 @@ def _mint_access_token(user_id: str, client_id: str, scope: list[str] | None = N
     scope = scope or []
 
     if os.environ.get("ACCESS_TOKEN_FORMAT", "opaque") == "jwt":
+        private_key = get_private_key()
         access_token = jwt.encode(
             {
                 "iss": "auth-server",
@@ -83,8 +74,9 @@ def _mint_access_token(user_id: str, client_id: str, scope: list[str] | None = N
                 "scope": " ".join(scope),
                 "exp": int(expires_at.timestamp()),
             },
-            os.environ["JWT_SECRET"],
-            algorithm="HS256",
+            private_key,
+            algorithm="RS256",
+            headers={"kid": "oauth-lab-v081"},
         )
     else:
         access_token = secrets.token_urlsafe(32)
@@ -155,13 +147,6 @@ def _handle_authorization_code(
     memory.authorization_codes[code]["used"] = True
 
     scope = authorization_code.get("scope") or []
-    needs_jwt_secret = "openid" in scope or os.environ.get("ACCESS_TOKEN_FORMAT", "opaque") == "jwt"
-    if needs_jwt_secret:
-        secret, err = _jwt_secret()
-        if err:
-            return err
-    else:
-        secret = None
 
     access_token, refresh_token, expires_in = _mint_token_pair(
         authorization_code["user_id"],
@@ -176,7 +161,6 @@ def _handle_authorization_code(
             authorization_code["client_id"],
             authorization_code["nonce"],
             scope,
-            secret,
         )
 
     return _token_response(access_token, refresh_token, expires_in, id_token)
@@ -195,11 +179,6 @@ def _handle_refresh_token(refresh_token_value: str, client_id: str):
 
     if refresh_token_data["expires_at"] < datetime.now():
         return _invalid_grant("Refresh token expired")
-
-    if os.environ.get("ACCESS_TOKEN_FORMAT", "opaque") == "jwt":
-        secret, err = _jwt_secret()
-        if err:
-            return err
 
     access_token, expires_in = _mint_access_token(
         refresh_token_data["user_id"],

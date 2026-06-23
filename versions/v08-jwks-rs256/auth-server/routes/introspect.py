@@ -4,13 +4,13 @@ The resource server authenticates as a service client (see memory.service_client
 not as demo-client. Returns identity only (sub); profile lives on the resource server.
 """
 
-import os
 from datetime import datetime
 
 import jwt
 from flask import Blueprint, jsonify, request
 
 from storage import memory
+from keys import get_private_key
 
 introspect_bp = Blueprint("introspect", __name__)
 
@@ -43,14 +43,13 @@ def _active_from_memory(token: str) -> dict | None:
 
 def _active_from_jwt(token: str) -> dict | None:
     """Stateless JWT access tokens: verify signature and claims locally."""
-    secret = os.environ.get("JWT_SECRET")
-    if not secret:
-        return None
+    private_key = get_private_key()
+    public_key = private_key.public_key()
     try:
         decoded = jwt.decode(
             token,
-            secret,
-            algorithms=["HS256"],
+            public_key,
+            algorithms=["RS256"],
             audience="resource-server",
             issuer="auth-server",
         )
