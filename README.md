@@ -28,7 +28,7 @@ Same three-process layout as v07, plus asymmetric signing: `GET /jwks`, RS256 `i
 | [v06](https://sauvikbiswas.com/posts/learning-oauth-2-06/) · [code](versions/v06-split-servers/) | **available** | split auth server / resource server; `POST /introspect`; JWT or introspection validation; profile data on resource server |
 | [v07](https://sauvikbiswas.com/posts/learning-oauth-2-07/) · [code](versions/v07-openid-connect/) | **available** | OpenID Connect on v06 split; `id_token`, `nonce`, UserInfo, discovery; `/profile` triptych (identity + API data) |
 | [v08](https://sauvikbiswas.com/posts/learning-oauth-2-08/) · [code](versions/v08-jwks-rs256/) | **available** | JWKS + RS256; drop shared `JWT_SECRET`; publish `jwks_uri`; client and resource server verify `id_token` (and JWT access tokens) with public keys |
-| v09 | **planned** | [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707) resource indicators; `resource` parameter binds tokens to a specific API at mint time |
+| [v09](https://sauvikbiswas.com/posts/learning-oauth-2-09/) · [code](versions/v09-resource-indicators/) | **scaffold** | [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707) resource indicators; `resource` binds tokens to `/api/resource-a` or `/api/resource-b` |
 | v10 | **planned** | [RFC 8693](https://datatracker.ietf.org/doc/html/rfc8693) token exchange (On-Behalf-Of); middle service swaps tokens for tighter downstream scope |
 | v11 | **planned** | MCP-style agent authorization; OAuth for AI tools calling protected APIs (dynamic client registration, delegation) |
 
@@ -110,7 +110,7 @@ For any other version, replace the folder names from the [version roadmap](#vers
 - [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) (v07)
 - [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) (v07)
 - [RFC 7517 — JSON Web Key (JWK)](https://datatracker.ietf.org/doc/html/rfc7517) (v08)
-- [RFC 8707 — Resource Indicators](https://datatracker.ietf.org/doc/html/rfc8707) (planned v09)
+- [RFC 8707 — Resource Indicators](https://datatracker.ietf.org/doc/html/rfc8707) (v09 scaffold)
 - [RFC 8693 — Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693) (planned v10)
 - [MCP Authorization](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization) (planned v11)
 - [OAuth 2.0 Simplified](https://www.oauth.com/)
