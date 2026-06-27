@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Resource Server{% endblock %}
+
+{% block content %}
+  <h1>OAuth Resource Server</h1>
+  <p class="muted">v09 scaffold: profile data here; tokens must be bound to a resource indicator (TODO).</p>
+  <p>Current mode: <code>TOKEN_VALIDATION={{ token_validation }}</code></p>
+  <ul class="links">
+    <li><code>GET /api/me</code> — Bearer token → validate → <code>sub</code> → local profile lookup</li>
+    {# TODO(v09 Step 11): GET /api/resource-a — gated by RESOURCE_A_INDICATOR #}
+    {# TODO(v09 Step 12): GET /api/resource-b — gated by RESOURCE_B_INDICATOR #}
+    <li><a href="/debug/state">/debug/state</a> — shows <code>profiles</code> dict (not auth tokens)</li>
+  </ul>
+{% endblock %}

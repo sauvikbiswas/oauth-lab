@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+  <h1>Profile</h1>
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% else %}
+
+  {% if resource_indicator %}
+    <p class="muted">Access token requested for: <code>{{ resource_indicator }}</code></p>
+  {% endif %}
+
+  <section id="resource-access-matrix">
+    <h2>Resource binding (RFC 8707)</h2>
+    <p class="muted">Same access token, both gated APIs. Only the endpoint matching the token's <code>aud</code> should return 200.</p>
+
+    <section id="resource-a">
+      <h3>/api/resource-a</h3>
+      <p class="muted">Requires <code>{{ resource_a_indicator }}</code></p>
+      {% if resource_a.ok %}
+        <p><strong>200 OK</strong> — token accepted for Resource A.</p>
+        <pre>{{ resource_a.body | tojson(indent=2) }}</pre>
+      {% else %}
+        <p class="error"><strong>HTTP {{ resource_a.status }}</strong>
+          {% if resource_a.body and resource_a.body.error_description %}
+            — {{ resource_a.body.error_description }}
+          {% else %}
+            — token not bound to this resource
+          {% endif %}
+        </p>
+      {% endif %}
+    </section>
+
+    <section id="resource-b">
+      <h3>/api/resource-b</h3>
+      <p class="muted">Requires <code>{{ resource_b_indicator }}</code></p>
+      {% if resource_b.ok %}
+        <p><strong>200 OK</strong> — token accepted for Resource B.</p>
+        <pre>{{ resource_b.body | tojson(indent=2) }}</pre>
+      {% else %}
+        <p class="error"><strong>HTTP {{ resource_b.status }}</strong>
+          {% if resource_b.body and resource_b.body.error_description %}
+            — {{ resource_b.body.error_description }}
+          {% else %}
+            — token not bound to this resource
+          {% endif %}
+        </p>
+      {% endif %}
+    </section>
+  </section>
+
+  <section id="id-token-claims">
+    <h2>id_token claims (OIDC)</h2>
+    <p class="muted">Verified locally with RS256 + JWKS from the auth server.</p>
+    {% if id_token_claims %}
+      <pre>{{ id_token_claims | tojson(indent=2) }}</pre>
+    {% else %}
+      <p><em>ID token claims are missing from session. Are you logged in?</em></p>
+    {% endif %}
+  </section>
+
+  <section id="userinfo">
+    <h2>UserInfo (auth server)</h2>
+    {% if userinfo is not none %}
+      {% if userinfo %}
+        <pre>{{ userinfo | tojson(indent=2) }}</pre>
+      {% else %}
+        <p><em>No UserInfo claims returned for the current access token scope.</em></p>
+      {% endif %}
+    {% else %}
+      <p><em>UserInfo response missing.</em></p>
+    {% endif %}
+  </section>
+
+  <section id="api-me">
+    <h2>/api/me (resource server)</h2>
+    {% if profile %}
+      <p>Logged in as <strong>{{ profile.username }}</strong> (<code>{{ profile.user_id }}</code>) with email <strong>{{ profile.email }}</strong>.</p>
+      {% if profile.metadata %}
+        <p><strong>Metadata</strong> (resource server only: not in OIDC scope): {{ profile.metadata }}</p>
+      {% endif %}
+      {% if token_grant == "authorization_code" %}
+        <p class="muted">Current access token from <strong>authorization code</strong> grant (initial login).</p>
+      {% elif token_grant == "refresh_token" %}
+        <p class="muted">Current access token from <strong>refresh token</strong> grant (silent refresh).</p>
+      {% endif %}
+    {% else %}
+      <p><em>Profile not found. Please login again.</em></p>
+    {% endif %}
+  </section>
+
+  <p><a href="/logout">Logout</a></p>
+  {% endif %}
+  <p><a href="/">Back to client home</a></p>
+{% endblock %}

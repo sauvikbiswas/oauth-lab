@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Authorization Server{% endblock %}
+
+{% block content %}
+  <h1>OAuth Authorization Server</h1>
+  <p class="muted">v09 scaffold: OpenID Provider + RFC 8707 resource indicators for <code>/api/resource-a</code> and <code>/api/resource-b</code>.</p>
+  <ul class="links">
+    <li><code>GET /authorize</code> — client sends <code>resource</code> URI alongside PKCE, <code>scope</code>, and <code>nonce</code></li>
+    <li><code>POST /token</code> — exchange authorization code or refresh token; returns <code>id_token</code> when <code>openid</code> is in scope</li>
+    <li><code>GET /.well-known/openid-configuration</code> — OIDC discovery; includes <code>protected_resources</code> (RFC 9728)</li>
+    <li><code>GET /jwks</code> — JWK Set for RS256 verification</li>
+    <li><code>GET /userinfo</code> — scoped identity claims (Bearer access token)</li>
+    <li><code>POST /introspect</code> — RFC 7662; resource server authenticates via <code>service_clients</code></li>
+    <li><a href="/login">/login</a></li>
+    <li><a href="/debug/state">/debug/state</a> — shows <code>clients</code> and <code>service_clients</code> separately</li>
+  </ul>
+{% endblock %}
