@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Choose resource{% endblock %}
+
+{% block content %}
+  <h1>Sign in</h1>
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+  <p class="muted">Pick which protected API this login should target. The access token will be bound to that resource indicator ([RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707)).</p>
+
+  <section>
+    <h2>Resource A</h2>
+    <p class="muted"><code>{{ resource_a_indicator }}</code></p>
+    <p>Billing compartment — invoices and payment history.</p>
+    <p><a href="/login/resource-a">Sign in for Resource A</a></p>
+  </section>
+
+  <section>
+    <h2>Resource B</h2>
+    <p class="muted"><code>{{ resource_b_indicator }}</code></p>
+    <p>Calendar compartment — meetings and availability.</p>
+    <p><a href="/login/resource-b">Sign in for Resource B</a></p>
+  </section>
+
+  <p><a href="/">Back to client home</a></p>
+{% endblock %}

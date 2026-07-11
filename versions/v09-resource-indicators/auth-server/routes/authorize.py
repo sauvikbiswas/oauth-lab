@@ -1,9 +1,4 @@
-"""Authorization endpoint — v09 scaffold on v08.
-
-TODO(v09 Step 2): parse `resource` from the authorize query ([RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707)).
-TODO(v09 Step 3): validate `resource` against an allowlist (e.g. memory.allowed_resources or env).
-TODO(v09 Step 4): persist `resource` on the authorization code dict alongside scope/nonce.
-"""
+"""Authorization endpoint — v09 resource indicators on v08."""
 
 import secrets
 from datetime import datetime, timedelta

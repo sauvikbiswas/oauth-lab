@@ -36,7 +36,6 @@
   <pre><code>curl -s http://localhost:25002/api/me \
   -H "Authorization: Bearer {% if access_token %}{{ access_token }}{% else %}PASTE_ACCESS_TOKEN_HERE{% endif %}"</code></pre>
   <p class="muted">Expected: <code>200</code> with <code>user_id</code>, <code>username</code>, and <code>email</code>. No header or bad token → <code>401</code>.</p>
-  {# TODO(v09 Step 11–12): document curl examples for /api/resource-a and /api/resource-b once implemented #}
 
   <p><a href="/debug/state">/debug/state</a> (client session + in-memory storage)</p>
 

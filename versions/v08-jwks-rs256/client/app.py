@@ -54,7 +54,6 @@ def create_app() -> Flask:
         access_token = session.get("access_token")
         profile = None
         if access_token:
-            # TODO(v06 Step 5): profile comes from resource server, not auth server.
             resource_server = os.environ.get("RESOURCE_SERVER_URL", "http://localhost:25002").rstrip("/")
             try:
                 resp = requests.get(
@@ -171,7 +170,6 @@ def create_app() -> Flask:
         return redirect(url_for("profile"))
 
     def fetch_profile(access_token: str):
-        # TODO(v06 Step 5): call resource server, not auth server.
         resource_server = os.environ.get("RESOURCE_SERVER_URL", "http://localhost:25002").rstrip("/")
         return requests.get(
             f"{resource_server}/api/me",

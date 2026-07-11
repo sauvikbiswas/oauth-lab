@@ -1,9 +1,4 @@
-"""Token endpoint — v09 scaffold on v08.
-
-TODO(v09 Step 5): accept optional `resource` on POST /token; must match the authorization code's resource.
-TODO(v09 Step 6): bind access tokens to `resource` — JWT `aud` claim or opaque store field.
-TODO(v09 Step 7): carry `resource` on refresh tokens; re-bind on refresh grant.
-"""
+"""Token endpoint — v09 resource indicators on v08."""
 
 import base64
 import hashlib

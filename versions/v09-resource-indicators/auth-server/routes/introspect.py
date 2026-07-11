@@ -1,8 +1,4 @@
-"""RFC 7662 token introspection — v09 scaffold on v08.
-
-TODO(v09 Step 8): include `aud` (resource indicator) in active introspection responses.
-TODO(v09 Step 8): reject tokens whose bound resource does not match the caller's expected API.
-"""
+"""RFC 7662 token introspection — v09 resource indicators on v08."""
 
 from datetime import datetime
 

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Agent (middle service){% endblock %}
+
+{% block content %}
+  <h1>Agent — v10</h1>
+  <p class="muted">Middle service on <code>:25003</code>. Presents a user's access token and receives a downstream token via <a href="https://datatracker.ietf.org/doc/html/rfc8693">RFC 8693</a> token exchange (On-Behalf-Of).</p>
+
+  <section>
+    <h2>Protected resources (from v09)</h2>
+    <ul>
+      <li>Resource A: <code>{{ resource_a }}</code></li>
+      <li>Resource B: <code>{{ resource_b }}</code></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Endpoints</h2>
+    <ul>
+      <li><code>POST /exchange</code> — subject token + target <code>resource</code> → exchanged access token</li>
+      <li><a href="/demo"><code>GET /demo</code></a> — standalone OBO matrix (paste subject token, exchange, probe A/B)</li>
+      <li><code>GET /debug/state</code> — in-memory exchange cache</li>
+    </ul>
+  </section>
+
+  <p class="muted">Start the OAuth client on <code>:25001</code>, log in for Resource A, then use the <a href="/demo">/demo</a> page, the client profile OBO section, or curl <code>POST /exchange</code>.</p>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}OBO demo{% endblock %}
+
+{% block content %}
+  <h1>On-Behalf-Of demo</h1>
+  <p class="muted">Standalone matrix on the agent. Paste a user access token minted for Resource A; the agent exchanges it for Resource B and probes both APIs.</p>
+
+  <section>
+    <h2>1. Subject token</h2>
+    <p class="muted">Log in for Resource A on the client, then copy <code>session.access_token</code> from <a href="{{ client_debug_url }}" target="_blank" rel="noopener">client debug state</a>.</p>
+    <form method="post" action="/demo">
+      <label for="subject_token">Subject access token</label>
+      <textarea id="subject_token" name="subject_token" rows="3" style="width:100%;font-family:monospace" placeholder="Paste access_token here">{{ subject_token or '' }}</textarea>
+      <p><button type="submit">Exchange for Resource B and show matrix</button></p>
+    </form>
+    {% if exchange_error %}
+      <p class="error">{{ exchange_error }}</p>
+    {% endif %}
+    {% if exchanged_token %}
+      <p class="muted">Exchanged token (truncated): <code>{{ exchanged_token[:16] }}…</code></p>
+    {% endif %}
+  </section>
+
+  {% if subject_a is not none %}
+  <section>
+    <h2>2. Subject token (user, bound to Resource A)</h2>
+    <section>
+      <h3>/api/resource-a</h3>
+      <p class="muted">Requires <code>{{ resource_a_indicator }}</code></p>
+      {% if subject_a.ok %}
+        <p><strong>200 OK</strong></p>
+        <pre>{{ subject_a.body | tojson(indent=2) }}</pre>
+      {% else %}
+        <p class="error"><strong>HTTP {{ subject_a.status }}</strong>{% if subject_a.body and subject_a.body.error_description %} — {{ subject_a.body.error_description }}{% endif %}</p>
+      {% endif %}
+    </section>
+    <section>
+      <h3>/api/resource-b</h3>
+      <p class="muted">Requires <code>{{ resource_b_indicator }}</code></p>
+      {% if subject_b.ok %}
+        <p><strong>200 OK</strong></p>
+        <pre>{{ subject_b.body | tojson(indent=2) }}</pre>
+      {% else %}
+        <p class="error"><strong>HTTP {{ subject_b.status }}</strong>{% if subject_b.body and subject_b.body.error_description %} — {{ subject_b.body.error_description }}{% endif %}</p>
+      {% endif %}
+    </section>
+  </section>
+
+  <section>
+    <h2>3. Exchanged token (agent OBO, bound to Resource B)</h2>
+    <section>
+      <h3>/api/resource-a</h3>
+      <p class="muted">Requires <code>{{ resource_a_indicator }}</code></p>
+      {% if exchanged_a.ok %}
+        <p><strong>200 OK</strong></p>
+        <pre>{{ exchanged_a.body | tojson(indent=2) }}</pre>
+      {% else %}
+        <p class="error"><strong>HTTP {{ exchanged_a.status }}</strong>{% if exchanged_a.body and exchanged_a.body.error_description %} — {{ exchanged_a.body.error_description }}{% endif %}</p>
+      {% endif %}
+    </section>
+    <section>
+      <h3>/api/resource-b</h3>
+      <p class="muted">Requires <code>{{ resource_b_indicator }}</code></p>
+      {% if exchanged_b.ok %}
+        <p><strong>200 OK</strong> — OBO token accepted for Resource B.</p>
+        <pre>{{ exchanged_b.body | tojson(indent=2) }}</pre>
+      {% else %}
+        <p class="error"><strong>HTTP {{ exchanged_b.status }}</strong>{% if exchanged_b.body and exchanged_b.body.error_description %} — {{ exchanged_b.body.error_description }}{% endif %}</p>
+      {% endif %}
+    </section>
+  </section>
+  {% endif %}
+
+  <p><a href="/">Back to agent home</a></p>
+{% endblock %}

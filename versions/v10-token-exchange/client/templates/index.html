@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}OAuth Client{% endblock %}
+
+{% block content %}
+  <h1>OAuth Client</h1>
+
+  {% if profile %}
+    <p>You are logged in as <strong>{{ profile.username }}</strong> (<code>{{ profile.user_id }}</code>).</p>
+    {% if session_resource %}
+      <p class="muted">Token bound to: <code>{{ session_resource }}</code></p>
+    {% endif %}
+    <p>
+      <a href="/profile">View profile</a>
+      ·
+      <a href="/logout">Log out</a>
+    </p>
+  {% elif access_token %}
+    <p>Session has an access token, but <code>GET /api/me</code> did not return a profile (token may be invalid or expired).</p>
+    <p>
+      <a href="/profile">Try profile</a>
+      ·
+      <a href="/login">Sign in again</a>
+      ·
+      <a href="/logout">Log out</a>
+    </p>
+  {% else %}
+    <p>Not logged in.</p>
+    <p><a href="/login">Choose resource and sign in</a></p>
+  {% endif %}
+
+  <p class="muted">v10: log in for Resource A, then use <code>/profile</code> to exchange via agent for Resource B (RFC 8693).</p>
+
+  <h2>Protected resource</h2>
+  <p class="muted">Call the resource server directly with your access token:</p>
+  <pre><code>curl -s http://localhost:25002/api/me \
+  -H "Authorization: Bearer {% if access_token %}{{ access_token }}{% else %}PASTE_ACCESS_TOKEN_HERE{% endif %}"</code></pre>
+  <p class="muted">Gated APIs: <code>/api/resource-a</code> and <code>/api/resource-b</code> (audience-bound).</p>
+
+  <p><a href="/debug/state">/debug/state</a> (client session + in-memory storage)</p>
+
+  <h2>Authorize negative tests</h2>
+  <p>
+    <a href="http://localhost:25000/authorize?response_type=code&amp;client_id=demo-client&amp;redirect_uri=http://localhost:25001/callback">
+      Without <code>state</code></a> — server should return 400
+  </p>
+  <p>
+    <a href="http://localhost:25000/authorize?response_type=code&amp;client_id=demo-client&amp;redirect_uri=http://localhost:25001/callback&amp;state=negative-test-no-pkce">
+      Without PKCE</a> — missing <code>code_challenge</code>, server should return 400
+  </p>
+  <p>
+    <a href="http://localhost:25000/authorize?response_type=code&amp;client_id=demo-client&amp;redirect_uri=http://localhost:25001/callback&amp;state=negative-test-plain&amp;code_challenge=dummy&amp;code_challenge_method=plain">
+      With <code>plain</code> challenge method</a> — server should return 400
+  </p>
+
+  <h2>PKCE interception demo</h2>
+  <p class="muted">Copy a used <code>code</code> from server <a href="http://localhost:25000/debug/state">/debug/state</a>, then:</p>
+  <pre><code>curl -s -X POST http://localhost:25000/token \
+  -d grant_type=authorization_code \
+  -d code=PASTE_STOLEN_CODE_HERE \
+  -d redirect_uri=http://localhost:25001/callback \
+  -d client_id=demo-client \
+  -d client_secret=demo-secret \
+  -d code_verifier=totally-wrong-verifier</code></pre>
+  <p class="muted">Expected: <code>PKCE verification failed</code>. Re-run with the same code → <code>authorization code already used</code>.</p>
+{% endblock %}
